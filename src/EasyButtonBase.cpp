@@ -18,6 +18,12 @@ void EasyButtonBase::onPressedFor(uint32_t duration, EasyButtonBase::callback_t 
 	_pressed_for_callback = callback;
 }
 
+void EasyButtonBase::onPressedContinues(uint32_t period, EasyButtonBase::callback_t callback)
+{
+	_held_continues_period = period;
+	_pressed_continues_callback = callback;
+}
+
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
 void EasyButtonBase::onSequence(uint8_t sequences, uint32_t duration, EasyButtonBase::callback_t callback)
 {
@@ -83,6 +89,19 @@ void EasyButtonBase::_checkPressedTime()
 			// Set as called.
 			_held_callback_called = true;
 			_pressed_for_callback();
+			_last_continues = read_started_ms;
 		}
 	}
+
+	if (_current_state && (read_started_ms - _last_continues) >= _held_continues_period && _pressed_continues_callback)
+	{
+		// Call the callback function for a long press continues event if it exist and the pressedFor has been called
+		if (_pressed_continues_callback && _held_callback_called)
+		{
+			_pressed_continues_callback();
+			_last_continues = read_started_ms;
+		}
+
+	}
+
 }

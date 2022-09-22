@@ -40,6 +40,7 @@ public:
     virtual bool read() = 0;                                                    // Returns the current debounced button state, true for pressed, false for released.
     void onPressed(callback_t callback);                                        // Call a callback function when the button has been pressed and released.
     void onPressedFor(uint32_t duration, callback_t callback);                  // Call a callback function when the button has been held for at least the given number of milliseconds.
+    void onPressedContinues(uint32_t period, callback_t callback);           // Call a callback function when the button continues to be pressed
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
     void onSequence(uint8_t sequences, uint32_t duration, callback_t callback); // Call a callback function when the given sequence has matched.
 #endif
@@ -58,12 +59,15 @@ protected:
     uint16_t _sequences_count;
 #endif
     uint32_t _held_threshold; // Held threshold.
+    uint32_t _held_continues_period; // Held Continues period.
 
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
     callback_t _pressed_sequence_callbacks[MAX_SEQUENCES];
 #endif
     callback_t _pressed_callback;     // Callback function for pressed events.
     callback_t _pressed_for_callback; // Callback function for pressedFor events.
+    callback_t _pressed_continues_callback; // Callback function for pressedContinues events.
+
     bool _held_callback_called;       // Indicate if button long press has been notified.
     bool _active_low;                 // Inverts button logic. If true, low = pressed else high = pressed.
     bool _current_state;              // Current button state, true = pressed.
@@ -71,6 +75,7 @@ protected:
     bool _changed;                    // Has the state change since last read.
     uint32_t _time;                   // Time of current state.
     uint32_t _last_change;            // Time of last state change.
+    uint32_t _last_continues;         // Time the last continues was fired
     bool _was_btn_held;               // Indicate if button was held.
 
     // Common functions
