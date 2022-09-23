@@ -6,6 +6,7 @@
  */
 
 #include "EasyButtonVirtual.h"
+#include "Defines.h"
 
 void EasyButtonVirtual::begin()
 {
@@ -50,7 +51,11 @@ bool EasyButtonVirtual::read()
 		{
 			if (_pressed_callback)
 			{
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+				_pressed_callback(*this);
+#else
 				_pressed_callback();
+#endif
 			}
 
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
@@ -59,7 +64,11 @@ bool EasyButtonVirtual::read()
 				if (_sequences[i].newPress(read_started_ms))
 				{
 					callback_t function = _pressed_sequence_callbacks[i];
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+					function(*this);
+#else
 					function();
+#endif
 				}
 			}
 #endif

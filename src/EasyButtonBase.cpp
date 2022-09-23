@@ -6,6 +6,7 @@
  */
 
 #include "EasyButtonBase.h"
+#include "Defines.h"
 
 void EasyButtonBase::onPressed(EasyButtonBase::callback_t callback)
 {
@@ -88,7 +89,11 @@ void EasyButtonBase::_checkPressedTime()
 		{
 			// Set as called.
 			_held_callback_called = true;
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+			_pressed_for_callback(*this);
+#else
 			_pressed_for_callback();
+#endif
 			_last_continues = read_started_ms;
 		}
 	}
@@ -98,7 +103,11 @@ void EasyButtonBase::_checkPressedTime()
 		// Call the callback function for a long press continues event if it exist and the pressedFor has been called
 		if (_pressed_continues_callback && _held_callback_called)
 		{
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+			_pressed_continues_callback(*this);
+#else
 			_pressed_continues_callback();
+#endif
 			_last_continues = read_started_ms;
 		}
 

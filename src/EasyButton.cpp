@@ -58,7 +58,11 @@ bool EasyButton::read()
 		{
 			if (_pressed_callback)
 			{
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+				_pressed_callback(*this);
+#else
 				_pressed_callback();
+#endif
 			}
 
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
@@ -67,7 +71,11 @@ bool EasyButton::read()
 				if (_sequences[i].newPress(read_started_ms))
 				{
 					callback_t function = _pressed_sequence_callbacks[i];
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+					function(*this);
+#else
 					function();
+#endif
 				}
 			}
 #endif
@@ -98,13 +106,19 @@ bool EasyButton::_readPin()
 
 bool EasyButton::supportsInterrupt()
 {
+#ifdef EASYBUTTON_ALLOW_INTERRUPTS
 	return (digitalPinToInterrupt(_pin) != NOT_AN_INTERRUPT);
+#else
+	return false;
+#endif
 }
 
 void EasyButton::enableInterrupt(EasyButton::callback_t callback)
 {
+#ifdef EASYBUTTON_ALLOW_INTERRUPTS
 	attachInterrupt(digitalPinToInterrupt(_pin), callback, CHANGE);
 	_read_type = EASYBUTTON_READ_TYPE_INTERRUPT;
+#endif
 }
 
 void EasyButton::disableInterrupt()

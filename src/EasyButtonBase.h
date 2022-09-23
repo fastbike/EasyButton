@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 #include "Sequence.h"
+#include "Defines.h"
 
 #if defined(ESP8266) || defined(ESP32)
 #define EASYBUTTON_FUNCTIONAL_SUPPORT 1
@@ -28,11 +29,21 @@ class EasyButtonBase
 {
 public:
 // Common functions.
-#ifdef EASYBUTTON_FUNCTIONAL_SUPPORT
-    typedef std::function<void()> callback_t;
+// Pointer to event handling methods
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+	#ifdef EASYBUTTON_FUNCTIONAL_SUPPORT
+	    typedef std::function<void(EasyButtonBase&)> callback_t;
+	#else
+	    typedef void (*callback_t)(EasyButtonBase&);
+	#endif
 #else
-    typedef void (*callback_t)();
+	#ifdef EASYBUTTON_FUNCTIONAL_SUPPORT
+	    typedef std::function<void()> callback_t;
+	#else
+	    typedef void (*callback_t)();
+	#endif
 #endif
+
     EasyButtonBase(bool active_low) : _active_low(active_low)
     {
     }
@@ -51,7 +62,7 @@ public:
     bool wasReleased();                  // Returns true if the button state at the last read was released.
     bool pressedFor(uint32_t duration);  // Returns true if the button state at the last read was pressed, and has been in that state for at least the given number of milliseconds.
     bool releasedFor(uint32_t duration); // Returns true if the button state at the last read was released, and has been in that state for at least the given number of milliseconds.
-
+    byte id;                             // useful field for use in an array of buttons
 protected:
     // Common variables.
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
