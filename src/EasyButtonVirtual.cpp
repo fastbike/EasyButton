@@ -49,12 +49,12 @@ bool EasyButtonVirtual::read()
 	{
 		if (!_was_btn_held)
 		{
-			if (_pressed_callback)
+			if (_click_callback)
 			{
 #ifndef EASYBUTTON_ALLOW_INTERRUPTS
-				_pressed_callback(*this);
+/*todo*/				_click_callback(*this);
 #else
-				_pressed_callback();
+/*todo*/				_click_callback();
 #endif
 			}
 
@@ -63,11 +63,12 @@ bool EasyButtonVirtual::read()
 			{
 				if (_sequences[i].newPress(read_started_ms))
 				{
-					callback_t function = _pressed_sequence_callbacks[i];
+/*todo*/					callback_handled_t function = _pressed_sequence_callbacks[i];
 #ifndef EASYBUTTON_ALLOW_INTERRUPTS
-					function(*this);
+							boolean handled = false;
+/*todo*/					function(*this, handled);
 #else
-					function();
+/*todo*/					function();
 #endif
 				}
 			}

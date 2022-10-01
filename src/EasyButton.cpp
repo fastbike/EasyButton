@@ -52,33 +52,59 @@ bool EasyButton::read()
 		}
 	}
 
+	if (wasPressed())
+	{
+        if (!_was_btn_down)
+		{
+			if (_button_down_callback)
+			{
+	#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+				_button_down_callback(*this);
+	#else
+				_button_down_callback();
+	#endif
+			}
+			_was_btn_down = true;
+		}
+
+	}
+
+// check to see if we are coming out of a multi click event
 	if (wasReleased())
 	{
 		if (!_was_btn_held)
 		{
-			if (_pressed_callback)
-			{
-#ifndef EASYBUTTON_ALLOW_INTERRUPTS
-				_pressed_callback(*this);
-#else
-				_pressed_callback();
-#endif
-			}
+
+		// run the sequence callbacks first - the order they are added does matter
+			boolean handled = false;
 
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
 			for (size_t i = 0; i < MAX_SEQUENCES; i++)
 			{
 				if (_sequences[i].newPress(read_started_ms))
 				{
-					callback_t function = _pressed_sequence_callbacks[i];
+					callback_handled_t function = _pressed_sequence_callbacks[i];
 #ifndef EASYBUTTON_ALLOW_INTERRUPTS
-					function(*this);
+					function(*this, handled);
 #else
 					function();
 #endif
 				}
+				if (handled) {
+					break;
+				}
 			}
 #endif
+
+			if (_click_callback)
+			{
+#ifndef EASYBUTTON_ALLOW_INTERRUPTS
+				_click_callback(*this);
+#else
+				_click_callback();
+#endif
+			}
+
 		}
 		// Button was not held.
 		else
@@ -88,6 +114,7 @@ bool EasyButton::read()
 
 		// Since button released, reset _pressed_for_callbackCalled value.
 		_held_callback_called = false;
+		_was_btn_down = false;
 	}
 	else if (isPressed() && _read_type == EASYBUTTON_READ_TYPE_POLL)
 	{

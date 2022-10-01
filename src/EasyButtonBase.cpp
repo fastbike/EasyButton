@@ -8,9 +8,14 @@
 #include "EasyButtonBase.h"
 #include "Defines.h"
 
-void EasyButtonBase::onPressed(EasyButtonBase::callback_t callback)
+void EasyButtonBase::onButtonDown(EasyButtonBase::callback_t callback)
 {
-	_pressed_callback = callback;
+	_button_down_callback = callback;
+}
+
+void EasyButtonBase::onButtonClick(EasyButtonBase::callback_t callback)
+{
+	_click_callback = callback;
 }
 
 void EasyButtonBase::onPressedFor(uint32_t duration, EasyButtonBase::callback_t callback)
@@ -26,7 +31,7 @@ void EasyButtonBase::onPressedContinues(uint32_t period, EasyButtonBase::callbac
 }
 
 #ifndef EASYBUTTON_DO_NOT_USE_SEQUENCES
-void EasyButtonBase::onSequence(uint8_t sequences, uint32_t duration, EasyButtonBase::callback_t callback)
+void EasyButtonBase::onSequence(uint8_t sequences, uint32_t duration, EasyButtonBase::callback_handled_t callback)
 {
 	if (_sequences_count < 5)
 	{
